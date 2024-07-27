@@ -56,6 +56,7 @@ func main() {
 
 	fyp := v1.Group("/fyp")
 	fyp.Get("/food", middleware.JWTMiddleware(), fypHandler.GetFyp)
+	fyp.Get("/search", middleware.JWTMiddleware(), fypHandler.Search)
 
 	app.Listen(":3000")
 }

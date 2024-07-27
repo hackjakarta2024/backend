@@ -14,6 +14,7 @@ type fypHandler struct {
 
 type FypHandler interface {
 	GetFyp(c *fiber.Ctx) error
+	Search(c *fiber.Ctx) error
 }
 
 func NewFypHandler(fypService service.FypService, logger *zap.Logger) FypHandler {
@@ -37,6 +38,26 @@ func (h *fypHandler) GetFyp(c *fiber.Ctx) error {
 	return c.Status(200).JSON(fiber.Map{
 		"message": "success",
 		"data":    fyp,
+	})
+
+}
+
+func (h *fypHandler) Search(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(string)
+
+	query := c.Query("query")
+
+	searchResp, err := h.fypService.Search(userID, query)
+	if err != nil {
+		h.logger.Error("Error searching FYP", zap.Error(err))
+		return c.Status(500).JSON(fiber.Map{
+			"error": err.Error,
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"message": "success",
+		"data":    searchResp,
 	})
 
 }

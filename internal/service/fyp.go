@@ -17,6 +17,7 @@ type fypService struct {
 
 type FypService interface {
 	GetFyp(userID uuid.UUID) (model.FypResponse, error)
+	Search(userID, query string) (model.SearchResponse, error)
 }
 
 func NewFypService(
@@ -80,4 +81,45 @@ func (s *fypService) GetFyp(userID uuid.UUID) (model.FypResponse, error) {
 	}
 
 	return fypResp, nil
+}
+
+func (s *fypService) Search(userID, query string) (model.SearchResponse, error) {
+	searchRespAI := model.SearchResponseAI{
+		UserID: uuid.MustParse("290fbc73-84f1-4a09-aa1f-1b09bbc2539e"),
+		Food: []model.FoodRespAI{
+			{
+				FoodID: uuid.MustParse("2083e20f-30f2-4d0d-ac20-e25530154f77"),
+				Desc:   "desc",
+			},
+		},
+	}
+
+	var searchResp model.SearchResponse
+	searchResp.UserID = searchRespAI.UserID
+	for _, sra := range searchRespAI.Food {
+		food, err := s.foodRepository.GetFoodByID(sra.FoodID)
+		if err != nil {
+			s.logger.Error("Error getting food by ID", zap.Error(err))
+			return model.SearchResponse{}, err
+		}
+
+		restaurant, err := s.restaurantRepository.GetRestaurantByID(food.RestaurantID)
+		if err != nil {
+			s.logger.Error("Error getting restaurant by ID", zap.Error(err))
+			return model.SearchResponse{}, err
+		}
+
+		searchResp.Food = append(searchResp.Food, model.FoodResponse{
+			ID:             sra.FoodID,
+			Name:           food.Name,
+			RestaurantName: restaurant.Name,
+			Desc:           sra.Desc,
+			FakePrice:      food.FakePrice,
+			RealPrice:      food.RealPrice,
+			Image:          food.Image,
+			RatingTotal:    food.RatingTotal,
+		})
+	}
+
+	return searchResp, nil
 }

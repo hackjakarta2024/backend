@@ -17,11 +17,14 @@ type FypResponse struct {
 	Food   []FoodResponse `json:"food"`
 }
 
-type FypResponseAI struct {
-	UserID              uuid.UUID    `json:"user_id"`
-	PromoID             uuid.UUID    `json:"promo_id"`
-	FoodRecommendations []FoodRespAI `json:"food_recommendations"`
-	Time                string       `json:"time"`
+type SearchResponse struct {
+	UserID uuid.UUID      `json:"user_id"`
+	Food   []FoodResponse `json:"food"`
+}
+
+type SearchResponseAI struct {
+	UserID uuid.UUID    `json:"user_id"`
+	Food   []FoodRespAI `json:"food"`
 }
 
 type FoodResponse struct {
