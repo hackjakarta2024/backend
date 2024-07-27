@@ -13,7 +13,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("error load .env")
+		log.Println("Error loading .env file")
 	}
 
 	db, err := config.NewDbPool()
