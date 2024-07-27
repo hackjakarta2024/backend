@@ -31,11 +31,12 @@ jobs:
             DB_NAME: ${{ secrets.DB_NAME }}
             DB_PORT: ${{ secrets.DB_PORT }}
             JWT_SECRETKET: ${{ secrets.JWT_SECRETKEY }}
+            PROJECT_ID: ${{ secrets.PROJECT_ID }}
         with:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_PK }}
-          envs: DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT, JWT_SECRETKET
+          envs: DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT, JWT_SECRETKET, PROJECT_ID
           script: |
             sudo su
             docker pull qais004/hackbackend:latest
@@ -50,4 +51,7 @@ jobs:
             -e DATABASE_NAME=$DB_NAME \
             -e DATABASE_PORT=$DB_PORT \
             -e JWT_SECRETKEY=$JWT_SECRETKET \
+            -e PROJECT_ID=$PROJECT_ID \
+            -e GOOGLE_APPLICATION_CREDENTIALS="/home/hack-jakarta-sa.json" \
+            -v /home/hack-jakarta-sa.json:/home/hack-jakarta-sa.json \
             qais004/hackbackend
