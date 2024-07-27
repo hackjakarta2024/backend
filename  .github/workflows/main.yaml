@@ -1,0 +1,53 @@
+name: Deploy to Compute Engine
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v2
+      
+      - name: Login to Dockerhub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build and push Docker image
+        run: |
+          docker build -t qais004/hackbackend:latest .
+          docker push qais004/hackbackend:latest
+      
+      - name: Deploy to Compute Engine
+        uses: appleboy/ssh-action@master
+        env:
+            DB_HOST: ${{ secrets.DB_HOST }}
+            DB_USER: ${{ secrets.DB_USER }}
+            DB_PASS: ${{ secrets.DB_PASS }}
+            DB_NAME: ${{ secrets.DB_NAME }}
+            DB_PORT: ${{ secrets.DB_PORT }}
+            JWT_SECRETKET: ${{ secrets.JWT_SECRETKEY }}
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_PK }}
+          envs: DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT, JWT_SECRETKET
+          script: |
+            sudo su
+            docker pull qais004/hackbackend:latest
+            docker stop hackbackend
+            docker rm hackbackend
+            docker run -d \
+            --name hackbackend \
+            -p 3000:3000 \
+            -e DATABASE_HOST=$DB_HOST \
+            -e DATABASE_USER=$DB_USER \
+            -e DATABASE_PASSWORD=$DB_PASS \
+            -e DATABASE_NAME=$DB_NAME \
+            -e DATABASE_PORT=$DB_PORT \
+            -e JWT_SECRETKEY=$JWT_SECRETKET \
+            qais004/hackbackend
