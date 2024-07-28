@@ -24,7 +24,7 @@ type SearchResponse struct {
 
 type SearchResponseAI struct {
 	UserID uuid.UUID    `json:"user_id"`
-	Food   []FoodRespAI `json:"food"`
+	Food   []FoodRespAI `json:"food_recommendations"`
 }
 
 type FoodResponse struct {
@@ -41,4 +41,9 @@ type FoodResponse struct {
 type FoodRespAI struct {
 	FoodID uuid.UUID `json:"food_id"`
 	Desc   string    `json:"desc"`
+}
+
+type Response struct {
+	Data   SearchResponseAI `json:"data"`
+	Status string           `json:"status"`
 }

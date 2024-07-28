@@ -1,10 +1,14 @@
 package service
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/hackjakarta2024/backend/internal/model"
 	"github.com/hackjakarta2024/backend/internal/repository"
 	"go.uber.org/zap"
+	"io"
+	"net/http"
 )
 
 type fypService struct {
@@ -84,19 +88,39 @@ func (s *fypService) GetFyp(userID uuid.UUID) (model.FypResponse, error) {
 }
 
 func (s *fypService) Search(userID, query string) (model.SearchResponse, error) {
-	searchRespAI := model.SearchResponseAI{
-		UserID: uuid.MustParse("290fbc73-84f1-4a09-aa1f-1b09bbc2539e"),
-		Food: []model.FoodRespAI{
-			{
-				FoodID: uuid.MustParse("2083e20f-30f2-4d0d-ac20-e25530154f77"),
-				Desc:   "desc",
-			},
-		},
+	url := fmt.Sprintf("https://hackml.timbangkit.cloud/search?user_id=%s&query=%s", userID, query)
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		s.logger.Error("Error creating request", zap.Error(err))
+		return model.SearchResponse{}, err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		s.logger.Error("Error making request", zap.Error(err))
+		return model.SearchResponse{}, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		s.logger.Error("Error reading response body", zap.Error(err))
+		return model.SearchResponse{}, err
+	}
+
+	var respAI model.Response
+	err = json.Unmarshal(body, &respAI)
+	if err != nil {
+		s.logger.Error("Error unmarshalling response body", zap.Error(err))
+		return model.SearchResponse{}, err
 	}
 
 	var searchResp model.SearchResponse
-	searchResp.UserID = searchRespAI.UserID
-	for _, sra := range searchRespAI.Food {
+	searchResp.UserID = respAI.Data.UserID
+	for _, sra := range respAI.Data.Food {
 		food, err := s.foodRepository.GetFoodByID(sra.FoodID)
 		if err != nil {
 			s.logger.Error("Error getting food by ID", zap.Error(err))
