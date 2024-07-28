@@ -29,10 +29,6 @@ GrabBites API Backend is a robust and scalable backend service designed to integ
 - **BigQuery**: For saving and querying AI-generated data.
 - **Zap**: For structured and high-performance logging.
 
-## Architecture
-
-![Architecture Diagram](path-to-your-architecture-diagram.png)
-
 ## Installation
 
 1. **Clone the repository**:
@@ -82,16 +78,41 @@ GrabBites API Backend is a robust and scalable backend service designed to integ
 ### Data Endpoint
 
 - **GET /api/v1/data**
-    - **Description**: Send recommendation .
+    - **Description**: Get recommendation food.
     - **Response**:
       ```json
       {
-        "data": [
-          {
-            "id": "string",
-            "value": "string"
-          }
-        ]
+        "message": string
+        "data": {
+          "user_id": "290fbc73-84f1-4a09-aa1f-1b09bbc2539e",
+          "promo": {
+              "id": "03990610-f220-4cf2-9e2e-e9b5f63f90ab",
+              "name": "Promo Merdeka Diskon 50%"
+          },
+          "food": [
+            {
+                "id": "a8e9bce3-3444-4904-a7f5-a89b7d30735c",
+                "name": "bakso telur bakso urat campur lontong",
+                "restaurant_name": "Bakso Goyang Lidah Mas Alim - Gambir",
+                "desc": "Nasi Goreng",
+                "fake_price": 30000,
+                "real_price": 25000,
+                "image": "image url",
+                "rating_total": 4,
+                "user_review": [
+                    {
+                        "name": "Samantha Smith",
+                        "review": "Bakso telur dan urat yang lezat, lontongnya juga pas. Kuahnya mantap!",
+                        "rating": 4
+                    },
+                    {
+                        "name": "Emily Davis",
+                        "review": "Bakso telur bakso urat campur lontong ini lezat! Variasi baksonya enak semua.",
+                        "rating": 5
+                    }
+                ]
+            }
+        }
       }
       ```
 
