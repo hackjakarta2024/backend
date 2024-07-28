@@ -36,6 +36,13 @@ type FoodResponse struct {
 	RealPrice      int       `json:"real_price"`
 	Image          string    `json:"image"`
 	RatingTotal    int       `json:"rating_total"`
+	UserReview     []Review  `json:"user_review"`
+}
+
+type Review struct {
+	Name   string `json:"name"`
+	Review string `json:"review"`
+	Rating int    `json:"rating"`
 }
 
 type FoodRespAI struct {

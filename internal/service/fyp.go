@@ -16,6 +16,7 @@ type fypService struct {
 	promoRepository      repository.PromoRepository
 	foodRepository       repository.FoodRepository
 	restaurantRepository repository.RestaurantRepository
+	userRepository       repository.UserRepository
 	logger               *zap.Logger
 }
 
@@ -29,6 +30,7 @@ func NewFypService(
 	promoRepository repository.PromoRepository,
 	foodRepository repository.FoodRepository,
 	restaurantRepository repository.RestaurantRepository,
+	userRepository repository.UserRepository,
 	logger *zap.Logger,
 ) FypService {
 	return &fypService{
@@ -36,6 +38,7 @@ func NewFypService(
 		promoRepository:      promoRepository,
 		foodRepository:       foodRepository,
 		restaurantRepository: restaurantRepository,
+		userRepository:       userRepository,
 		logger:               logger,
 	}
 }
@@ -70,6 +73,27 @@ func (s *fypService) GetFyp(userID uuid.UUID) (model.FypResponse, error) {
 			return model.FypResponse{}, err
 		}
 
+		historyUserFood, err := s.foodRepository.GetHistoryUserFoodByFoodID(uuid.MustParse(foodRecommendation.FoodID))
+		if err != nil {
+			s.logger.Error("Error getting history user food by food ID", zap.Error(err))
+			return model.FypResponse{}, err
+		}
+
+		var userReview []model.Review
+		for _, huf := range historyUserFood {
+			user, err := s.userRepository.GetUserByID(huf.UserID.String())
+			if err != nil {
+				s.logger.Error("Error getting user by ID", zap.Error(err))
+				return model.FypResponse{}, err
+			}
+
+			userReview = append(userReview, model.Review{
+				Name:   user.Name,
+				Review: huf.Review,
+				Rating: huf.Rating,
+			})
+		}
+
 		foodResp := model.FoodResponse{
 			ID:             food.ID,
 			Name:           food.Name,
@@ -79,6 +103,7 @@ func (s *fypService) GetFyp(userID uuid.UUID) (model.FypResponse, error) {
 			RealPrice:      food.RealPrice,
 			Image:          food.Image,
 			RatingTotal:    food.RatingTotal,
+			UserReview:     userReview,
 		}
 
 		fypResp.Food = append(fypResp.Food, foodResp)
@@ -133,6 +158,27 @@ func (s *fypService) Search(userID, query string) (model.SearchResponse, error) 
 			return model.SearchResponse{}, err
 		}
 
+		historyUserFood, err := s.foodRepository.GetHistoryUserFoodByFoodID(sra.FoodID)
+		if err != nil {
+			s.logger.Error("Error getting history user food by food ID", zap.Error(err))
+			return model.SearchResponse{}, err
+		}
+
+		var userReview []model.Review
+		for _, huf := range historyUserFood {
+			user, err := s.userRepository.GetUserByID(huf.UserID.String())
+			if err != nil {
+				s.logger.Error("Error getting user by ID", zap.Error(err))
+				return model.SearchResponse{}, err
+			}
+
+			userReview = append(userReview, model.Review{
+				Name:   user.Name,
+				Review: huf.Review,
+				Rating: huf.Rating,
+			})
+		}
+
 		searchResp.Food = append(searchResp.Food, model.FoodResponse{
 			ID:             sra.FoodID,
 			Name:           food.Name,
@@ -142,6 +188,7 @@ func (s *fypService) Search(userID, query string) (model.SearchResponse, error) 
 			RealPrice:      food.RealPrice,
 			Image:          food.Image,
 			RatingTotal:    food.RatingTotal,
+			UserReview:     userReview,
 		})
 	}
 

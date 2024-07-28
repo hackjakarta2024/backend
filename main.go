@@ -46,7 +46,7 @@ func main() {
 	foodRepository := repository.NewFoodRepository(db)
 	restaurantRepository := repository.NewRestaurantRepository(db)
 	fypRepository := repository.NewFypRepository(db, bq, logger)
-	fypService := service.NewFypService(fypRepository, promoRepository, foodRepository, restaurantRepository, logger)
+	fypService := service.NewFypService(fypRepository, promoRepository, foodRepository, restaurantRepository, userRepository, logger)
 	fypHandler := handler.NewFypHandler(fypService, logger)
 
 	api := app.Group("/api")
